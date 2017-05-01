@@ -9,9 +9,9 @@
 
 Подробности для установки данных библиотек смотрите в на google.com
 Для операционной системы Linux с использованием *Conda*:
-'''
-  conda create --name pyn_test --channel conda-forge pynio pyngl
+```
+  conda create --name pyn_test --channel conda-forge pynio pyngl scipy
   source activate pyn_test
-'''
+```
 
 <!-- ### Сборка проекта ### -->
