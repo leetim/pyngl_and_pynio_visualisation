@@ -38,41 +38,63 @@ T = np.transpose
 
 
 ################################################################################
-######################## Reading from interpoled #######################################
+######################### Write GribLike #######################################
 ################################################################################
+
+def write_for_spillmod():
+    w = read_from_file("come1.nc")
+    print len(w.time)
+    # exit()
+    for i in range(len(w.time)):
+        write_to_grb_like("./grb/wrf_data0{}{}.nc".format(i/10, i%10), w.u[i,:,:], w.v[i,:,:],
+                          w.lat, w.lon, "u-component_of_wind_height_above_ground",
+                          "v-component_of_wind_height_above_ground")
 
 # int_file = Nio.open_file("wind2004.nc", "r")
 # uarr = int_file.variables["u"][0,:,:]
 # varr = int_file.variables["v"][0,:,:]
 # lat = int_file.variables["lat"][:]
 # lon = int_file.variables["lon"][:]
+################################################################################
+############################# Draw Field #######################################
+################################################################################
 
-w = read_from_file("come_temp.nc")
-for i in range(40):
-    print_vector_field(w.u[i,:,:], w.v[i,:,:], w.lat[:], w.lon[:], "./im/im{}{}.png".format(i/10, i%10), "png")
+def Draw():
+    w = read_from_file("come_temp.nc")
+    for i in range(40):
+        print_vector_field(w.u[i,:,:], w.v[i,:,:], w.lat[:], w.lon[:], "./im/im{}{}.png".format(i/10, i%10), "png")
 
-exit()
-new_lat = np.linspace(38.0, 65.0, 200)
-new_lon = np.linspace(115.0, 172.0, 200)
-new_time = np.linspace(min_t+4, (min_t+4) + 121.0/6, 40)
 
-# new_time = np.linspace(min_t+4, (min_t+4) + 121.0/6, 2)
-# new_lat = np.linspace(58.251405, 60.420895, 10)
-# new_lon = np.linspace(142.927289, 146.443603, 12)
-uarr = np.ones(np.shape(uar))
-varr = np.ones(np.shape(var))
-for i in range(len(uar)):
-    for j in range(len(uar[0])):
-        uarr[i][j] = uar[i][j]
-        varr[i][j] = var[i][j]
-u_new = SPLINE_3D(u_arr, time, lat, lon, new_time, new_lat, new_lon)
-v_new = SPLINE_3D(v_arr, time, lat, lon, new_time, new_lat, new_lon)
-# print u_new
+# exit()
+################################################################################
+########################## Interpolation #######################################
+################################################################################
+def Interpolation_write():
+    new_lat = np.linspace(38.0, 65.0, 20)
+    new_lon = np.linspace(115.0, 172.0, 20)
+    new_time = np.linspace(min_t+4, (min_t+4) + 121.0/6, 40)
 
-write_to_cdf("come.nc", u_new, v_new, new_lat, new_lon, new_time)
+    # new_time = np.linspace(min_t+4, (min_t+4) + 121.0/6, 2)
+    # new_lat = np.linspace(58.251405, 60.420895, 10)
+    # new_lon = np.linspace(142.927289, 146.443603, 12)
+    uarr = np.ones(np.shape(uar))
+    varr = np.ones(np.shape(var))
+    for i in range(len(uar)):
+        for j in range(len(uar[0])):
+            uarr[i][j] = uar[i][j]
+            varr[i][j] = var[i][j]
+    u_new = SPLINE_3D(u_arr, time, lat, lon, new_time, new_lat, new_lon)
+    v_new = SPLINE_3D(v_arr, time, lat, lon, new_time, new_lat, new_lon)
+    # print u_new
+
+    write_to_cdf("come2.nc", u_new, v_new, new_lat, new_lon, new_time)
 
 ################################################################################
 ################################################################################
+
+# Interpolation_write()
+Draw()
+# write_for_spillmod()
 
 # u_new = BIG_INTERPOL(u_arr, time, lat, lon, new_time, new_lat, new_lon)
 # v_new = BIG_INTERPOL(v_arr, time, lat, lon, new_time, new_lat, new_lon)

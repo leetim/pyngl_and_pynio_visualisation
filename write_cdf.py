@@ -35,8 +35,31 @@ def write_to_cdf(f, u, v, lat, lon, time, u_name = 'u', v_name = 'v'):
     # print len(lat)
     # print np.max(np.abs(u_arr))
     # print nc.variables['u'].shape
+    print time
     nc.variables[u_name][:,:,:] = u[:,:,:]
     nc.variables[v_name][:,:,:] = v[:,:,:]
+    nc.variables['lat'][:] = lat[:]
+    nc.variables['lon'][:] = lon[:]
+    nc.variables['time'][:] = time[:]
+    # nc.variables['time'] = new_time
+    nc.close()
+
+def write_to_grb_like(f, u, v, lat, lon, u_name = 'u', v_name = 'v'):
+    nc = Nio.open_file(f, 'w')
+    nc.create_dimension('x',len(lon))
+    nc.create_dimension('y',len(lat))
+    nc.create_variable(u_name, 'd', ('y', 'x'))
+    nc.create_variable(v_name, 'd', ('y', 'x'))
+    nc.create_variable('lat', 'd', ('y',))
+    nc.create_variable('lon', 'd', ('x',))
+    # nc.create_variable('time', 'd', ('time',))
+    # print np.shape(u_new)
+    # print len(lon)
+    # print len(lat)
+    # print np.max(np.abs(u_arr))
+    # print nc.variables['u'].shape
+    nc.variables[u_name][:,:] = u[:,:]
+    nc.variables[v_name][:,:] = v[:,:]
     nc.variables['lat'][:] = lat[:]
     nc.variables['lon'][:] = lon[:]
     # nc.variables['time'] = new_time

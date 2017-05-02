@@ -67,7 +67,7 @@ def print_vector_field(u, v, lat, lon, out_file = "/some.ps", wks_type = "ps"):
     resources.vcLevelColors = A([[1.0*(10 + i)/20, 0.0, 1.0*(10 - i)/10] for i in range(11)])
     resources.mpAreaMaskingOn       = True # Draw vectors in color.
 
-    resources.tiMainString  = "wind at ohotsk sea - September 2004"
+    resources.tiMainString  = "wind at Okhotsk sea - 5-10 September 2004"
     resources.tiXAxisString = "longitude"
     resources.tiYAxisString = "latitude"
     resources.mpPerimOn             = True            # Turn on a perimeter.
@@ -85,13 +85,28 @@ def print_vector_field(u, v, lat, lon, out_file = "/some.ps", wks_type = "ps"):
     resources.vfYCStartV  = float(lat[0])
     resources.vfYCEndV    = float(lat[len(lat[:])-1])
 
+    # resources.gsnSpreadColors = True
+    resources.vcLevelSelectionMode = "ManualLevels"
+    resources.vcLevelSpacingF = 28.0/9
+    resources.vcMinLevelValF = 0.0
+    resources.vcMaxLevelValF = 28.0
+
+    # resources.cnLevelSelectionMode = "ManualLevels"
+    # resources.cnLevelSpacingF = 28.0/11
+    # resources.cnMinLevelValF = 0.0
+    # resources.cnMaxLevelValF = 28.0
+    #
+    # resources.mpLevelSpacingF = 28.0/11
+    # resources.mpMinLevelValF = 0.0
+    # resources.mpMaxLevelValF = 28.0
+
     resources.mpGridMaskMode            = "MaskNotOcean"                #-- draw grid over ocean, not land
     resources.mpGridLineDashPattern     =   2                           #-- grid dash pattern
     resources.pmLabelBarDisplayMode     = "Always"                      #-- turn on a labelbar
     resources.lbOrientation             = "Horizontal"                  #-- labelbar orientation
     resources.lbLabelFontHeightF        =  0.008                        #-- labelbar label font size
     resources.lbBoxMinorExtentF         =  0.22                         #-- decrease height of labelbar boxes
-    resources.lbTitleString             = "TEMPERATURE (~S~o~N~F)"      #-- labelbar title string
+    resources.lbTitleString             = "WIND SPEED (m/c~S~2~N~)"      #-- labelbar title string
     resources.lbTitleFontHeightF        =  0.010                        #-- labelbar title font size
     resources.lbBoxMinorExtentF         =  0.18                         #-- decrease height of labelbar boxes
     # resources.lbFillColor         =  False                         #-- decrease height of labelbar boxes

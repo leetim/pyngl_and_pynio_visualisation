@@ -47,8 +47,8 @@ def read_from_file(f, u_name = 'u', v_name = 'v'):
     # print v
     lat = input_file.variables["lat"][:]
     lon = input_file.variables["lon"][:]
+    time = np.zeros(len(u))
     # time = input_file.variables["time"][:]
-    time = np.zeros(len(u_name))
     return Wind(u, v, lat, lon, time)
 
 
