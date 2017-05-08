@@ -33,7 +33,9 @@ cmap = np.array([[1.00, 0.00, 0.00], [1.00, 0.00, 0.40], \
 # rlist = Ngl.Resources()
 # rlist.wkColorMap         = "BlueRedGray"     # Set colors for contours.
 
-def print_vector_field(u, v, lat, lon, out_file = "/some.ps", wks_type = "ps"):
+
+#convert -delay 15 -trim +repage *.png kholmsk1.gif
+def print_vector_field(u, v, lat, lon, out_file = "/some.ps", wks_type = "ps", title = "Okhotsk sea"):
     wks_type = wks_type
     resources = Ngl.Resources()
     resources.mpLimitMode = "LatLon"
@@ -67,7 +69,7 @@ def print_vector_field(u, v, lat, lon, out_file = "/some.ps", wks_type = "ps"):
     resources.vcLevelColors = A([[1.0*(10 + i)/20, 0.0, 1.0*(10 - i)/10] for i in range(11)])
     resources.mpAreaMaskingOn       = True # Draw vectors in color.
 
-    resources.tiMainString  = "wind at Okhotsk sea - 5-10 September 2004"
+    resources.tiMainString  = title
     resources.tiXAxisString = "longitude"
     resources.tiYAxisString = "latitude"
     resources.mpPerimOn             = True            # Turn on a perimeter.

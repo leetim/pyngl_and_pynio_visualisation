@@ -4,6 +4,7 @@ import Nio
 import Ngl
 import os
 from interpolation import *
+from datetime import *
 # import random as rnd
 # from scipy.optimize import leastsq, linprog
 # from scipy import stats
@@ -26,6 +27,29 @@ class Wind:
         self.lon = lon
         self.time = time
 
+class Wave:
+    def __init__(self, u, v, lat_u, lon_u, lat_v, lon_v):
+        self.u = u
+        self.v = v
+        self.lat_u = lat_u
+        self.lon_u = lon_u
+        self.lat_v = lat_v
+        self.lon_v = lon_v
+        self.time = np.linspace(0, len(u)-1, len(u))
+    def __add__(self, other):
+        tu = np.zeros((self.u.shape[0] + other.u.shape[0], self.u.shape[1], self.u.shape[2]))
+        tu[:len(self.u),:,:] = self.u
+        tu[len(self.u):len(self.u)+len(other.u),:,:] = other.u
+        del self.u
+        self.u = tu
+        tv = np.zeros((self.v.shape[0] + other.v.shape[0], self.v.shape[1], self.v.shape[2]))
+        tv[:len(self.v),:,:] = self.v
+        tv[len(self.v):len(self.v)+len(other.v),:,:] = other.v
+        del self.v
+        self.v = tv
+        self.time = np.linspace(0, len(self.time)+len(other.time)-1, len(self.time)+len(other.time))
+        return self
+
 ################################################################################
 ######################## Reading from uw #######################################
 ################################################################################
@@ -40,6 +64,18 @@ def read_from_file2(f1, f2):
     time = vfile.variables["time"][:]
     return Wind(u, v, lat, lon, time)
 
+def read_wave(f1):
+    input_file = Nio.open_file(f1, "r")
+    u = input_file.variables["u"][:, 31, :,:]
+    v = input_file.variables["v"][:, 31, :,:]
+    # print v
+    lat_u = input_file.variables["lat_u"][:, 0]
+    lon_u = input_file.variables["lon_u"][0, :]
+    lat_v = input_file.variables["lat_v"][:, 0]
+    lon_v = input_file.variables["lon_v"][0, :]
+
+    return Wave(u, v, lat_u, lon_u, lat_v, lon_v)
+
 def read_from_file(f, u_name = 'u', v_name = 'v'):
     input_file = Nio.open_file(f, "r")
     u = input_file.variables[u_name][:,:,:]
@@ -52,23 +88,30 @@ def read_from_file(f, u_name = 'u', v_name = 'v'):
     return Wind(u, v, lat, lon, time)
 
 
+dt0 = datetime(1800, 1, 1, 0, 0, 0)
+dt_start = datetime(2004, 9, 8, 0, 0, 0)
+start = (dt_start - dt0).days*24
+
 ufile = Nio.open_file("uw2004.nc", "r")
 vfile = Nio.open_file("vw2004.nc", "r")
 u = ufile.variables["uwnd"]
 v = vfile.variables["vwnd"]
-# print v
+
 lat = vfile.variables["lat"][35:0:-1]
 lon = vfile.variables["lon"][55:100]
-print len(lat)
 time = vfile.variables["time"]
-time = A(list(map(int, time[:]-time[0])))
-min_t = np.min(time)/6 + 248*4
-max_t = min_t + 7*4
-# print (min_t, max_t)
-# new_time =
-time = np.linspace(min_t, max_t, 28)
-u_arr = u[min_t:max_t, 0, 35:0:-1, 55:100]*u.scale_factor + u.add_offset
-v_arr = v[min_t:max_t, 0, 35:0:-1, 55:100]*v.scale_factor + v.add_offset
+
+min_t = np.min(A(list(map(int, time[:]))))
+ind = (start-min_t)/6
+
+
+time = A(list(map(int, time[ind-5:ind+9]-time[ind])))
+min_t = np.min(time)
+max_t = np.max(time)
+
+
+u_arr = u[ind-5:ind+9, 0, 35:0:-1, 55:100]*u.scale_factor + u.add_offset
+v_arr = v[ind-5:ind+9, 0, 35:0:-1, 55:100]*v.scale_factor + v.add_offset
 uar = u_arr[0, ::, ::]#*u.scale_factor + u.add_offset
 var = v_arr[0, ::, ::]#*v.scale_factor + v.add_offset
 

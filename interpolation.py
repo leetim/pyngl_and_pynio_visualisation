@@ -1,7 +1,7 @@
 import sys
 import numpy as np
-import Nio
-import Ngl
+# import Nio
+# import Ngl
 import os
 import threading as th
 from scipy.interpolate import RegularGridInterpolator as RGI
@@ -142,6 +142,11 @@ def bcub_interpol(u, arx, ary, arz, x, y, z):
 
 def LAGRANGE1(u, x_cur, x_new):
     n = len(u)
+    u = A(list(map(float, u)))
+    x_cur = A(list(map(float, x_cur)))
+    x_new = A(list(map(float, x_new)))
+    # print type(u[0])
+
     F = interp1d(x_cur, u, kind='linear')
     res = np.zeros(len(x_new))
     for k in range(len(res)):
@@ -176,6 +181,26 @@ def SPLINE_3D(u, x_cur, y_cur, z_cur, x, y, z):
             u_new3[i, j, :] = LAGRANGE1(u_new2[i, j, :], z_cur, z)
     print "z done"
     return u_new3
+
+def SPLINE_2D(u, x_cur, y_cur, x, y):
+    print "Start interp"
+    print u.shape
+    print x_cur.shape
+    print y_cur.shape
+    print "_____________"
+    # print (x.shape, y.shape)
+
+    u_new1 = np.zeros((len(x), len(y_cur)))
+    print u_new1.shape
+    for j in range(u_new1.shape[1]):
+        u_new1[:, j] = LAGRANGE1(u[:, j], x_cur, x)
+
+    u_new2 = np.zeros((len(x), len(y)))
+    print u_new2.shape
+    for i in range(u_new2.shape[0]):
+        u_new2[i, :] = LAGRANGE1(u_new1[i, :], y_cur, y)
+    return u_new2
+
 
 ################################################################################
 ################################################################################

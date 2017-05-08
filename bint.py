@@ -64,15 +64,55 @@ def Draw():
     for i in range(40):
         print_vector_field(w.u[i,:,:], w.v[i,:,:], w.lat[:], w.lon[:], "./im/im{}{}.png".format(i/10, i%10), "png")
 
+def Print_wave():
+    w1 = read_wave("roms_his_0304.nc")
+    w2 = read_wave("roms_his_0305.nc")
+    w1 = w1+w2
+    new_time = np.linspace(0, 47, 96)
+    new_lat = np.linspace(45.77, 47.81, 30)
+    new_lon = np.linspace(140.62, 144.45, 30)
+    # new_time = np.linspace(0, 47, 48)
+    # new_lat = np.linspace(43.6, 65.0, 50)
+    # new_lon = np.linspace(130.1, 165.0, 50)
+    print "________"
+    print w1.time
+    print w2.time
+    print new_time
+    print "________"
+    u_new = SPLINE_3D(w1.u, w1.time, w1.lat_u, w1.lon_u, new_time, new_lat, new_lon)
+    v_new = SPLINE_3D(w1.v, w1.time, w1.lat_v, w1.lon_v, new_time, new_lat, new_lon)
+    # u_new = np.ones((2, 20, 20))*1E37
+    # v_new = np.ones((2, 20, 20))
+    for i in range(u_new.shape[0]):
+        for j in range(u_new.shape[1]):
+            for k in range(u_new.shape[2]):
+                if u_new[i,j,k] > 1E5:
+                    u_new[i,j,k] = 0.0
+    for i in range(v_new.shape[0]):
+        for j in range(v_new.shape[1]):
+            for k in range(v_new.shape[2]):
+                if v_new[i,j,k] > 1E5:
+                    v_new[i,j,k] = 0.0
+    for i in range(len(u_new)):
+        # print u_new[i,:,:]
+        # print v_new[i,:,:]
+        print_vector_field(u_new[i,:,:], v_new[i,:,:], new_lat[:], new_lon[:], "./sah_wave_im/im{}{}.png".format(i/10, i%10), "png",
+            title = "Wave Sakhalin {} September 2004 {}{}:{}0".format(8 + i/24/2, (i/2%24)/10, (i/2%24)%10, 3*(i%2)))
+    write_to_cdf("sah_wave.nc", u_new, v_new, new_lat, new_lon, new_time)
 
 # exit()
 ################################################################################
 ########################## Interpolation #######################################
 ################################################################################
 def Interpolation_write():
-    new_lat = np.linspace(38.0, 65.0, 20)
-    new_lon = np.linspace(115.0, 172.0, 20)
-    new_time = np.linspace(min_t+4, (min_t+4) + 121.0/6, 40)
+    # new_lat = np.linspace(46.88, 47.17, 20)
+    # new_lon = np.linspace(141.7, 142.4, 20)
+    # new_lat = np.linspace(43.6, 65.0, 20)
+    # new_lon = np.linspace(130.1, 165.0, 20)
+    new_time = np.linspace(0, 47, 96)
+    new_lat = np.linspace(45.77, 47.81, 30)
+    new_lon = np.linspace(140.62, 144.45, 30)
+    # new_time = np.linspace(min_t+4, (min_t+4) + 121.0/6, 40)
 
     # new_time = np.linspace(min_t+4, (min_t+4) + 121.0/6, 2)
     # new_lat = np.linspace(58.251405, 60.420895, 10)
@@ -85,15 +125,19 @@ def Interpolation_write():
             varr[i][j] = var[i][j]
     u_new = SPLINE_3D(u_arr, time, lat, lon, new_time, new_lat, new_lon)
     v_new = SPLINE_3D(v_arr, time, lat, lon, new_time, new_lat, new_lon)
+    for i in range(len(u_new)):
+        print_vector_field(u_new[i], v_new[i], new_lat, new_lon, "./sah_wind_im/00{}{}.png".format(i/10, i%10), "png",
+            title = "Wind Sakhalin {} September 2004 {}{}:{}0".format(8 + i/24/2, (i/2%24)/10, (i/2%24)%10, 3*(i%2)))
+    write_to_cdf("sah_wind.nc", u_new, v_new, new_lat, new_lon, new_time)
     # print u_new
 
-    write_to_cdf("come2.nc", u_new, v_new, new_lat, new_lon, new_time)
 
 ################################################################################
 ################################################################################
 
-# Interpolation_write()
-Draw()
+Print_wave()
+Interpolation_write()
+# Draw()
 # write_for_spillmod()
 
 # u_new = BIG_INTERPOL(u_arr, time, lat, lon, new_time, new_lat, new_lon)
