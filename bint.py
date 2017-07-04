@@ -60,29 +60,40 @@ def write_for_spillmod():
 ################################################################################
 
 def Draw():
-    w = read_from_file("come_temp.nc")
-    for i in range(40):
-        print_vector_field(w.u[i,:,:], w.v[i,:,:], w.lat[:], w.lon[:], "./im/im{}{}.png".format(i/10, i%10), "png")
+    w = read_from_file("sah_wave.nc")
+    max_lim = np.max(np.sqrt(w.u**2 + w.v**2))*1.1
+    for i in range(w.u.shape[0]):
+        print_vector_field(w.u[i,:,:], w.v[i,:,:], w.lat[:], w.lon[:], "./sah_wave_im/im00{}{}.png".format(i/10, i%10), "png",
+            title = "Wave Sakhalin {} September 2004 {}{}:{}0".format(8 + i/24/2, (i/2%24)/10, (i/2%24)%10, 3*(i%2)), max_limit = max_lim)
+    w = read_from_file("sah_wind.nc")
+    max_lim = np.max(np.sqrt(w.u**2 + w.v**2))*1.1
+    for i in range(w.u.shape[0]):
+        print_vector_field(w.u[i,:,:], w.v[i,:,:], w.lat[:], w.lon[:], "./sah_wind_im/im00{}{}.png".format(i/10, i%10), "png",
+            title = "Wind Sakhalin {} September 2004 {}{}:{}0".format(8 + i/24/2, (i/2%24)/10, (i/2%24)%10, 3*(i%2)), max_limit = max_lim)
 
 def Print_wave():
-    w1 = read_wave("roms_his_0304.nc")
-    w2 = read_wave("roms_his_0305.nc")
+    w1 = read_wave("SPILLMOD_DATA/roms_his_0303.nc")
+    w2 = read_wave("SPILLMOD_DATA/roms_his_0304.nc")
     w1 = w1+w2
-    new_time = np.linspace(0, 47, 96)
-    new_lat = np.linspace(45.77, 47.81, 30)
-    new_lon = np.linspace(140.62, 144.45, 30)
-    # new_time = np.linspace(0, 47, 48)
-    # new_lat = np.linspace(43.6, 65.0, 50)
-    # new_lon = np.linspace(130.1, 165.0, 50)
-    print "________"
-    print w1.time
-    print w2.time
-    print new_time
-    print "________"
+    # new_time = np.linspace(0, 47, 96)
+    # new_lat = np.linspace(45.77, 47.81, 30)
+    # new_lon = np.linspace(140.62, 144.45, 30)
+    new_time = np.linspace(0, 47, 48)
+    new_lat = np.linspace(43.6, 65.0, 50)
+    new_lon = np.linspace(130.1, 165.0, 50)
+    # print "________"
+    # print w1.time
+    # print w2.time
+    # print new_time
+    # print "________"
     u_new = SPLINE_3D(w1.u, w1.time, w1.lat_u, w1.lon_u, new_time, new_lat, new_lon)
     v_new = SPLINE_3D(w1.v, w1.time, w1.lat_v, w1.lon_v, new_time, new_lat, new_lon)
     # u_new = np.ones((2, 20, 20))*1E37
     # v_new = np.ones((2, 20, 20))
+    # i = 4
+    # print_vector_field(u_new[i,:,:], v_new[i,:,:], new_lat[:], new_lon[:], "./im{}{}.png".format(i/10, i%10), "png",
+    #     title = "Wave Okhotsk sea {} May 2017 {}{}:{}0".format(10 + i/24/2, (i/2%24)/10, (i/2%24)%10, 3*(i%2)), max_limit = max_lim)
+    # return
     for i in range(u_new.shape[0]):
         for j in range(u_new.shape[1]):
             for k in range(u_new.shape[2]):
@@ -93,12 +104,15 @@ def Print_wave():
             for k in range(v_new.shape[2]):
                 if v_new[i,j,k] > 1E5:
                     v_new[i,j,k] = 0.0
+    max_lim = np.max(np.sqrt(u_new**2 + v_new**2))*1.1
     for i in range(len(u_new)):
-        # print u_new[i,:,:]
-        # print v_new[i,:,:]
-        print_vector_field(u_new[i,:,:], v_new[i,:,:], new_lat[:], new_lon[:], "./sah_wave_im/im{}{}.png".format(i/10, i%10), "png",
-            title = "Wave Sakhalin {} September 2004 {}{}:{}0".format(8 + i/24/2, (i/2%24)/10, (i/2%24)%10, 3*(i%2)))
-    write_to_cdf("sah_wave.nc", u_new, v_new, new_lat, new_lon, new_time)
+        print u_new[i,:,:]
+        print v_new[i,:,:]
+        print_vector_field(u_new[i,:,:], v_new[i,:,:], new_lat[:], new_lon[:], "./okhotsk_wave_im/im{}{}.png".format(i/10, i%10), "png",
+            title = "Wave Okhotsk sea {} May 2017 {}{}:{}0".format(8 + i/24/2, (i/2%24)/10, (i/2%24)%10, 3*(i%2)), max_limit = max_lim)
+    # write_to_cdf("okhotsk_wave_20170510.nc", u_new, v_new, new_lat, new_lon, new_time)
+
+
 
 # exit()
 ################################################################################
@@ -125,18 +139,62 @@ def Interpolation_write():
             varr[i][j] = var[i][j]
     u_new = SPLINE_3D(u_arr, time, lat, lon, new_time, new_lat, new_lon)
     v_new = SPLINE_3D(v_arr, time, lat, lon, new_time, new_lat, new_lon)
+    max_lim = np.max(np.sqrt(u_new**2 + v_new**2))*1.1
     for i in range(len(u_new)):
-        print_vector_field(u_new[i], v_new[i], new_lat, new_lon, "./sah_wind_im/00{}{}.png".format(i/10, i%10), "png",
-            title = "Wind Sakhalin {} September 2004 {}{}:{}0".format(8 + i/24/2, (i/2%24)/10, (i/2%24)%10, 3*(i%2)))
-    write_to_cdf("sah_wind.nc", u_new, v_new, new_lat, new_lon, new_time)
+        print_vector_field(u_new[i], v_new[i], new_lat, new_lon, "./okhotsk_wave_im/00{}{}.png".format(i/10, i%10), "png",
+            title = "Wind Sakhalin {} September 2004 {}{}:{}0".format(8 + i/24/2, (i/2%24)/10, (i/2%24)%10, 3*(i%2)), max_limit = max_lim)
+    # write_to_cdf("sah_wind.nc", u_new, v_new, new_lat, new_lon, new_time)
     # print u_new
 
+def read_wind_from_grib():
+    time = np.linspace(-72, 48, 41)
+    # print time
+    Z = np.zeros
+    new_time = np.linspace(0, 47, 96)
+    new_lat = np.linspace(43.6, 65.0, 30)
+    new_lon = np.linspace(130.1, 165.0, 30)
+    f = ["%03d"%(i,) for i in range(41)]
+    w = read_grib("SPILLMOD_DATA/wrfprs.%s.grb"%(f[0],))
+    shape = (41, w.u.shape[0], w.u.shape[1])
+    wind = Wind(Z(shape), Z(shape), None, None)
+    wind.u[0,:,:] = w.u
+    wind.v[0,:,:] = w.v
+    wind.lat = w.lat
+    wind.lon = w.lon
+    for i in range(1, len(f)):
+        w = read_grib("SPILLMOD_DATA/wrfprs.%s.grb"%(f[i],))
+        wind.u[i,:,:] = w.u
+        wind.v[i,:,:] = w.v
+    wind.time = time
+    w = wind
+    # print time
+    print "_________________________________________"
+    print w.u.shape
+    print w.v.shape
+    print w.time.shape
+    print w.lat
+    print w.lon
+    print new_time.shape
+    print new_lat
+    print new_lon
+    print "_________________________________________"
+    u = SPLINE_3D(w.u, w.time, w.lat, w.lon, new_time, new_lat, new_lon)
+    v = SPLINE_3D(w.v, w.time, w.lat, w.lon, new_time, new_lat, new_lon)
+    # write_to_cdf("okh_wind_20170510.nc", u, v, new_lat, new_lon, new_time)
+        # print w.u.shape
+
+    max_lim = np.max(np.sqrt(u**2 + v**2))
+    for  i in range(u.shape[0]):
+        print_vector_field(u[i,:,:], v[i,:,:], new_lat[:], new_lon[:], "./okhotsk_wind_im/im{}{}.png".format(i/10, i%10), "png",
+            title = "Wind Okhotsk sea {} May 2017 {}{}:{}0".format(10 + i/24/2, (i/2%24)/10, (i/2%24)%10, 3*(i%2)), max_limit = max_lim)
+        # print_vector_field(w.u[::10, ::10], w.v[::10, ::10], w.lat[::10], w.lon[::10], "wrf_20170510/arim%s.png"%(f[i],), "png",
+        #     title = "Wind", max_limit = max_lim)
 
 ################################################################################
 ################################################################################
-
+# read_wind_from_grib()
+# Interpolation_write()
 Print_wave()
-Interpolation_write()
 # Draw()
 # write_for_spillmod()
 

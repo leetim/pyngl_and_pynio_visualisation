@@ -51,9 +51,11 @@ new_z1 = pix1
 # print pix1.shape
 print pix2.shape
 # new_z1 = np.zeros((len(new_x), len(new_y), 3))
-new_z2 = np.zeros((len(new_x), len(new_y), 3))
-for i in range(3):
-    new_z2[:,:,i] = SPLINE_2D(pix2[:,:,i], arr_x, arr_y, new_x, new_y)
+# new_z2 = np.zeros((len(new_x), len(new_y), 3))
+# for i in range(3):
+#     new_z2[:,:,i] = SPLINE_2D(pix2[:,:,i], arr_x, arr_y, new_x, new_y)
+new_z2 = pix2[:,pix.shape[0]/2:pix.shape[0]/2+pix.shape[0],:]
+print new_z2.shape
 # k1 = (new_z2.shape[1]-1024)/2
 # k2 = k1 + 1024
 # new_z2 = new_z2[:,k1:k2,:]

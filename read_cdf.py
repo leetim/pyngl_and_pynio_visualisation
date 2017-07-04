@@ -20,7 +20,7 @@ A = np.array
 T = np.transpose
 
 class Wind:
-    def __init__(self, u, v, lat, lon, time):
+    def __init__(self, u, v, lat, lon, time = None):
         self.u = u
         self.v = v
         self.lat = lat
@@ -28,7 +28,7 @@ class Wind:
         self.time = time
 
 class Wave:
-    def __init__(self, u, v, lat_u, lon_u, lat_v, lon_v):
+    def __init__(self, u, v, lat_u=None, lon_u=None, lat_v=None, lon_v=None, temperature=None):
         self.u = u
         self.v = v
         self.lat_u = lat_u
@@ -36,6 +36,7 @@ class Wave:
         self.lat_v = lat_v
         self.lon_v = lon_v
         self.time = np.linspace(0, len(u)-1, len(u))
+        self.temperature = temperature
     def __add__(self, other):
         tu = np.zeros((self.u.shape[0] + other.u.shape[0], self.u.shape[1], self.u.shape[2]))
         tu[:len(self.u),:,:] = self.u
@@ -86,6 +87,45 @@ def read_from_file(f, u_name = 'u', v_name = 'v'):
     time = np.zeros(len(u))
     # time = input_file.variables["time"][:]
     return Wind(u, v, lat, lon, time)
+
+def read_grib(f, u_name = 'u', v_name = 'v'):
+    gfile = Nio.open_file(f, "r")
+    keys = gfile.variables.keys()
+    u_var = None
+    v_var = None
+    for i in keys:
+        if gfile.variables[i].long_name[0:1] == 'v':
+            v_var = gfile.variables[i]
+        if gfile.variables[i].long_name[0:1] == 'u':
+            u_var = gfile.variables[i]
+    u = u_var[350:50:-3, 250:750:3]
+    v = v_var[350:50:-3, 250:750:3]
+    lat = gfile.variables["g0_lat_0"][350:50:-3]
+    lon = gfile.variables["g0_lon_1"][250:750:3]
+    # print u_var
+    # print v_var
+    # print np.min(lat)
+    # print np.min(lon)
+    # print np.max(lat)
+    # print np.max(lon)
+    # exit()
+    # print u.shape
+
+    # lat = u_var.units
+    # print lat
+    # print var.long_name
+    return Wind(u, v, lat, lon)
+
+def read_cdf_from_pyom(file):
+    ncfile = Nio.open_file(file, "r")
+    keys = ncfile.variables.keys()
+    print A(keys)
+    u = ncfile.variables["u"][:, ::2, 0, ::2]
+    v = ncfile.variables["w"][:, ::2, 0, ::2]
+    temp = ncfile.variables["temp"][:, ::2, 0, ::2]
+    # print temp.shape
+    # exit()
+    return Wave(u, v, temperature = temp)
 
 
 dt0 = datetime(1800, 1, 1, 0, 0, 0)
